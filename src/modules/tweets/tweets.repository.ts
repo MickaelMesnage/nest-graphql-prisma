@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Tweet } from '@prisma/client';
+import { startOfDay } from 'date-fns';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -35,5 +36,16 @@ export class TweetsRepository {
   }): Promise<Tweet> {
     const { where } = params;
     return this.prisma.tweet.delete({ where });
+  }
+
+  async getTweetsInTheDayForUser(userId: number): Promise<number> {
+    return (
+      await this.prisma.tweet.findMany({
+        where: {
+          userId: { equals: userId },
+          createdAt: { gte: startOfDay(new Date()) },
+        },
+      })
+    ).length;
   }
 }
